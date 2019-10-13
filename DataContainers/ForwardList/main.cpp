@@ -4,13 +4,16 @@ using namespace std;
 //#define INDEX_OPERATOR_CHECK
 #define HARDCORE_CHECK
 
+template<typename T>class List;
+
+template<typename T>
 class Element
 {
-	int Data;		//Значение элемента
-	Element* pNext;	//Адрес следующего элемента
+	T Data;		//Значение элемента
+	Element<T>* pNext;	//Адрес следующего элемента
 	static int count;
 public:
-	Element(int Data, Element* pNext = nullptr)
+	Element(T Data, Element<T>* pNext = nullptr)
 	{
 		this->Data = Data;
 		this->pNext = pNext;
@@ -22,14 +25,16 @@ public:
 		count--;
 		cout << "EDestructor:\t" << this << endl;
 	}
-	friend class List;
+	friend class List<T>;
 };
 
-int Element::count = 0;
+template<typename T>
+int Element<T>::count = 0;
 
+template<typename T>
 class List
 {
-	Element* Head;	//Адрес начала списка
+	Element<T>* Head;	//Адрес начала списка
 	int size;		//Размер списка
 public:
 	int get_size()const
@@ -48,19 +53,20 @@ public:
 		/*this->Head = nullptr;
 		this->size = 0;*/
 		while (size--)push_front(0);
-
 	}
-	List(initializer_list<int> il):List()
+
+	List(initializer_list<T> il):List()
 	{
 		//cout << typeid(il.begin()).name() << endl;
-		for (int const* it = il.begin(); it != il.end(); it++)
+		for (T const* it = il.begin(); it != il.end(); it++)
 		{
 			push_back(*it);
 		}
 	}
-	List(const List& other) :List()
+
+	List(const List<T>& other) :List()
 	{
-		for (Element* Temp = other.Head; Temp != nullptr; Temp = Temp->pNext)
+		for (Element<T>* Temp = other.Head; Temp != nullptr; Temp = Temp->pNext)
 		{
 			push_back(Temp->Data);
 		}
@@ -74,11 +80,11 @@ public:
 	}
 
 	//			Operators:
-	List& operator=(const List& other)
+	List<T>& operator=(const List<T>& other)
 	{
 		if (this == &other)return *this;
 		while (Head)pop_front();
-		for (Element* Temp = other.Head; Temp != nullptr; Temp = Temp->pNext)
+		for (Element<T>* Temp = other.Head; Temp != nullptr; Temp = Temp->pNext)
 		{
 			push_back(Temp->Data);
 		}
@@ -86,25 +92,25 @@ public:
 		return *this;
 	}
 
-	int& operator[](int Index)
+	T& operator[](int Index)
 	{
-		Element* Temp = Head;
+		Element<T>* Temp = Head;
 		for (int i = 0; i < Index; i++)Temp = Temp->pNext;
 		return Temp->Data;
 	}
 
 	//			Adding elements:
-	void push_front(int Data)
+	void push_front(T Data)
 	{
 		//1)Создаем новый элемент:
-		Element* New = new Element(Data);
+		Element<T>* New = new Element<T>(Data);
 		//2)"Привязываем новый элемент к Голове (Head)":
 		New->pNext = Head;
 		//3)Голову переводим на новый элемент.
 		Head = New;
 		size++;
 	}
-	void push_back(int Data)
+	void push_back(T Data)
 	{
 		if (Head == nullptr)
 		{
@@ -112,13 +118,13 @@ public:
 			return;
 		}
 		//1) Доходим до конца списка:
-		Element* Temp = Head;
+		Element<T>* Temp = Head;
 		while (Temp->pNext != nullptr)
 		{
 			Temp = Temp->pNext;
 		}
 		//2) Добавляем элемент:
-		Temp->pNext = new Element(Data);
+		Temp->pNext = new Element<T>(Data);
 		size++;
 	}
 	void insert(int Index, int Data)
@@ -134,11 +140,11 @@ public:
 			return;
 		}
 		//1) Дойти до нужной позиции:
-		Element* Temp = Head;
+		Element<T>* Temp = Head;
 		//if(sizeof(Temp))
 		for (int i = 0; i < Index-1; i++)Temp = Temp->pNext;
 		//2) Добавить элемент в список:
-		Element* New = new Element(Data);
+		Element<T>* New = new Element<T>(Data);
 		New->pNext = Temp->pNext;
 		Temp->pNext = New;
 		size++;
@@ -149,7 +155,7 @@ public:
 	{
 		if (Head == nullptr)return;
 		//1) Запоминаем адрес удаляемого элемента
-		Element* to_del = Head;
+		Element<T>* to_del = Head;
 		//2) Исключаем элемент из списка:
 		Head = Head->pNext;
 		//3) Удаляем элемент из памяти:
@@ -168,7 +174,7 @@ public:
 		}
 
 		//1)Дойти до конца списка:
-		Element* Temp = Head;
+		Element<T>* Temp = Head;
 		while (Temp->pNext->pNext != nullptr)
 		{
 			Temp = Temp->pNext;
@@ -195,9 +201,9 @@ public:
 		{
 			return;
 		}
-		Element* Temp = Head;
+		Element<T>* Temp = Head;
 		for (int i = 0; i < Index - 1; i++)Temp = Temp->pNext;
-		Element* to_del = Temp->pNext;
+		Element<T>* to_del = Temp->pNext;
 		Temp->pNext = Temp->pNext->pNext;
 		delete to_del;
 		size--;
@@ -205,7 +211,7 @@ public:
 
 	void print()
 	{
-		Element* Temp = Head;	//Temp - это итератор.
+		Element<T>* Temp = Head;	//Temp - это итератор.
 		//Итератор - это указатель, при помощи которого
 		//можно получить доступ, к элементам структуры данных.
 		while (Temp != nullptr)
@@ -260,7 +266,7 @@ void main()
 #endif // INDEX_OPERATOR_CHECK
 
 #ifdef HARDCORE_CHECK
-	List list1 = { 3, 5, 8, 13, 21 };
+	List<int> list1 = { 3, 5, 8, 13, 21 };
 	list1 = list1;
 	list1.print();
 	/*List list2 = { 34, 55, 89 };
@@ -273,7 +279,8 @@ void main()
 	//http://www.cplusplus.com/reference/initializer_list/initializer_list/
 #endif // HARDCORE_CHECK
 
-
+	List<double> dbl_list = { 2.5, 3.14, 8, 2 };
+	dbl_list.print();
 }
 
 //Team Viewer
